@@ -47,6 +47,7 @@ immutable rootDeps = [
     &html,
     &toolchainInfo,
     &style,
+    &dmdAsan,
 ];
 
 int main(string[] args)
@@ -352,6 +353,101 @@ alias dmdDefault = makeDep!((builder, dep) => builder
     .description("Build dmd")
     .deps([dmdExe(null, null), dmdConf])
 );
+
+alias dmdAsan = makeDep!((builder, dep) {
+
+    version (Windows) {
+	    enum ZIP = "ldc2-1.18.0-windows-x64";
+        enum ARCHIVE = ZIP ~ ".7z";
+    }
+    else {
+        version (OSX)
+            enum ZIP = "ldc2-1.18.0-osx-x86_64";
+        else version (Posix)
+            enum ZIP = "ldc2-1.18.0-linux-x86_64";
+
+        enum ARCHIVE = ZIP ~ ".tar.xz";
+    }
+
+    enum URL = "https://github.com/ldc-developers/ldc/releases/download/v1.18.0/" ~ ARCHIVE;
+
+    const ldcDir = env["GENERATED"].buildPath("ldc", env["OS"]);
+
+    alias ldc = makeDep!((ldcBuilder, ldcDep) => ldcBuilder
+        .msg("(INSTALL) LDC")
+        .target(ldcDir.buildPath(ZIP, "bin", "ldmd2".exeName))
+        .condition(() => exists(ldcDep.target))
+        .commandFunction(() {
+            mkdirRecurse(ldcDir);
+
+            const zip = ldcDir.buildPath(ARCHIVE);
+
+            if (!exists(zip) && !download(zip, URL)) {
+                abortBuild("Could not retrieve ldc from: " ~ URL);
+            }
+
+            version (Windows)
+	        run(["C:/Program Files/7-Zip/7z.exe", "x", zip, "-o" ~ ldcDir]);
+            else
+                run(["tar", "-xvf", zip, "-C", ldcDir]);
+        })
+    );
+
+    const rtDir = ldcDir.buildPath("druntime");
+
+    // ASAN-DRuntime based on https://johanengelen.github.io/ldc/2017/12/25/LDC-and-AddressSanitizer.html
+    alias druntime = makeDep!((rtBuilder, rtDep) => rtBuilder
+        .msg("(LDC) DRuntime")
+        .target(rtDir.buildPath("lib", "libdruntime-ldc-debug".libName))
+        .deps([ldc])
+        .condition(() => exists(rtDep.target))
+        .commandFunction(() {
+            const blacklist = ldcDir.buildPath("asan_blacklist.txt");
+
+            std.file.write(blacklist, `
+fun:_D*callWithStackShell*
+fun:_D*getcacheinfoCPUID2*
+fun:*12conservative2gc*
+fun:_D4core5cpuid*
+
+fun:_D2*conservative*collectRoots*
+            `);
+
+            run([
+                "ldc-build-runtime",
+                "--ldc", ldc.target.replace(`\`, `/`),
+                "--buildDir", rtDir.replace(`\`, `/`),
+                "--dflags", flags["DFLAGS"].filter!"a.length".chain(["-fsanitize=address", "-fsanitize-blacklist=" ~ blacklist]).join(";").replace(`\`, `/`),
+                "-j" ~ totalCPUs.to!string,
+                "BUILD_SHARED_LIBS=OFF"
+            ]);
+        })
+    );
+
+    builder
+        .name("dmd-asan")
+        .deps([druntime])
+        .commandFunction(() {
+
+            // Patch dependencies to use the installed ldc with ASan
+            foreach(dep; [lexer, backendObj, backend, dmdDefault.deps[0]]) {
+                dep.command[0] = ldc.target;
+                dep.command ~= ["-fsanitize=address", "-disable-fp-elim", "-O0"];
+            }
+
+            const asanArgs = ldcDir.buildPath("asanargs.d");
+            std.file.write(asanArgs, q{
+                extern(C) const(char*) __asan_default_options() {
+                    return "leak_check_at_exit=false,detect_stack_use_after_return=true";
+                }
+            });
+            scope (exit) remove(asanArgs);
+
+            dmdDefault.deps[0].command ~= ["-defaultlib=" ~ druntime.target, asanArgs, "-L-z", "-Lstack-size=32000000"];
+
+            dmdDefault.run();
+        });
+});
 
 /// Dependency to run the DMD unittest executable.
 alias runDmdUnittest = makeDep!((builder, dep) {
