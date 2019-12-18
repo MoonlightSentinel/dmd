@@ -219,7 +219,7 @@ private void resolveHelper(TypeQualified mt, const ref Loc loc, Scope* sc, Dsymb
     else
     {
         // check for deprecated or disabled aliases
-        s.checkDeprecated(loc, sc);
+        // s.checkDeprecated(loc, sc);
         if (d)
             d.checkDisabled(loc, sc, true);
     }

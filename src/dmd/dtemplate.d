@@ -5824,7 +5824,8 @@ extern (C++) class TemplateInstance : ScopeDsymbol
         semantictiargsdone = 1u << (_nest.sizeof * 8 - 1), // MSB of _nest
         havetempdecl = semantictiargsdone >> 1,
         gagged = semantictiargsdone >> 2,
-        available = gagged - 1 // always last flag minus one, 1s for all available bits
+        deprecated_ = semantictiargsdone >> 3,
+        available = deprecated_ - 1 // always last flag minus one, 1s for all available bits
     }
 
     extern(D) final @safe @property pure nothrow @nogc
@@ -5852,6 +5853,16 @@ extern (C++) class TemplateInstance : ScopeDsymbol
         {
             if (x) _nest |= Flag.gagged;
             else _nest &= ~Flag.gagged;
+        }
+
+        extern(C++) override bool isDeprecated() const
+        {
+            return !!(this._nest & Flag.deprecated_);
+        }
+
+        void setDeprecated()
+        {
+            this._nest |= Flag.deprecated_;
         }
     }
 
@@ -7406,6 +7417,70 @@ extern (C++) class TemplateInstance : ScopeDsymbol
             //printf("\ttdtypes[%d] = %p\n", i, o);
             tempdecl.declareParameter(sc, tp, o);
         }
+    }
+
+    /// Returns: True if any parameters of this template instance are deprecated
+    extern (D) final bool hasDeprecatedParameters()
+    {
+        // Based on https://issues.dlang.org/show_bug.cgi?id=7619
+        // Determine if we should infer deprecated for the template instance
+        static bool isDeprecated(RootObject o)
+        {
+            for (Dsymbol s = getDsymbol(o); s; )
+            {
+                if (s.isDeprecated())
+                    return true;
+
+                auto fd = s.isFuncDeclaration();
+                s = fd ? fd.overnext : null;
+            }
+
+            return false;
+        }
+
+        foreach (o; tdtypes)
+        {
+            if (isDeprecated(o))
+                return true;
+
+            if (auto tuple = o.isTuple())
+            {
+                foreach (obj; tuple.objects)
+                {
+                    if (isDeprecated(obj))
+                        return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    extern(D) final bool inferDeprecatedFrom(Dsymbol deprSym, Scope* sc)
+    {
+        assert(deprSym);
+        assert(this.tiargs);
+
+        foreach (arg; *this.tiargs)
+        {
+            Dsymbol argSym = arg.isDsymbol();
+            if (!argSym) {
+                if (auto type = arg.isType())
+                    argSym = type.toDsymbol(sc);
+                else
+                {
+                    printf("%s: %s", argSym.kind(), argSym.toChars());
+                    assert(false);
+                }
+            }
+            if (argSym && deprSym == argSym)
+            {
+                this.setDeprecated();
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /****************************************
