@@ -555,6 +555,7 @@ extern (C++) final class TemplateDeclaration : ScopeDsymbol
 
     Dsymbol onemember;      // if !=null then one member of this template
 
+    bool deprecated_; /// this template declaration is deprecated
     bool literal;           // this template declaration is a literal
     bool ismixin;           // this is a mixin template declaration
     bool isstatic;          // this is static template declaration
@@ -2521,6 +2522,11 @@ extern (C++) final class TemplateDeclaration : ScopeDsymbol
         if (dim == 0)
             return null;
         return (*parameters)[dim - 1].isTemplateTupleParameter();
+    }
+
+    extern(C++) override final bool isDeprecated() const
+    {
+        return this.deprecated_;
     }
 
     /***********************************

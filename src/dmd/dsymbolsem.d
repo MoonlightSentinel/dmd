@@ -2727,6 +2727,9 @@ private extern(C++) final class DsymbolSemanticVisitor : Visitor
         tempdecl.protection = sc.protection;
         tempdecl.cppnamespace = sc.namespace;
         tempdecl.isstatic = tempdecl.toParent().isModule() || (tempdecl._scope.stc & STC.static_);
+        // Start from members because Dsymbol.oneMember strips Attrib/DeprecatedDeclarations
+        tempdecl.deprecated_ = (sc.stc & STC.deprecated_) || (tempdecl.onemember &&(*tempdecl.members)[0].isDeprecated);
+
         UserAttributeDeclaration.checkGNUABITag(tempdecl, sc.linkage);
 
         if (!tempdecl.isstatic)
@@ -5947,6 +5950,8 @@ void templateInstanceSemantic(TemplateInstance tempinst, Scope* sc, Expressions*
     assert(tempdecl);
 
     TemplateStats.incInstance(tempdecl);
+
+    tempdecl.checkDeprecated(tempinst.loc, sc);
 
     // If tempdecl is a mixin, disallow it
     if (tempdecl.ismixin)

@@ -362,8 +362,29 @@ extern (C++) class Dsymbol : ASTNode
         if (sc.isDeprecated())
             return false;
 
+        Dsymbol start = this;
+
+        if (auto ti = this.isInstantiated())
+        {
+            assert(ti.tempdecl); // Should always be resolved here
+
+            // Don't issue additional messages if this symbol is instantiated
+            // from a deprecated template
+            if (ti.tempdecl.isDeprecated())
+                return false;
+
+            // Check onemember when searching for a deprecation message, e.g.
+            // template S() {
+            //      deprecated("Reason") struct S { }
+            // }
+            auto td = ti.tempdecl.isTemplateDeclaration();
+            assert(td); // Can this ever fail in a normal compilation?
+            if (td.onemember)
+                start = td.onemember;
+        }
+
         const(char)* message = null;
-        for (Dsymbol p = this; p; p = p.parent)
+        for (Dsymbol p = start; p; p = p.parent)
         {
             message = p.depdecl ? p.depdecl.getMessage() : null;
             if (message)

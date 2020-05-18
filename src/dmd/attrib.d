@@ -314,6 +314,11 @@ extern (C++) class StorageClassDeclaration : AttribDeclaration
 
     }
 
+    override bool isDeprecated() const
+    {
+        return !!(stc & STC.deprecated_);
+    }
+
     override inout(StorageClassDeclaration) isStorageClassDeclaration() inout
     {
         return this;
