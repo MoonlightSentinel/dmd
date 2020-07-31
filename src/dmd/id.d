@@ -310,6 +310,8 @@ immutable Msgtable[] msgtable =
     { "__ArrayDtor" },
     { "_d_delThrowable" },
     { "_d_assert_fail" },
+    { "_d_function_trace_entry" },
+    { "_d_function_trace_exit" },
     { "dup" },
     { "_aaApply" },
     { "_aaApply2" },

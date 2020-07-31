@@ -549,6 +549,8 @@ private extern(C++) final class Semantic3Visitor : Visitor
 
             if (funcdecl.fbody)
             {
+                addTracingHooks(funcdecl);
+
                 auto sym = new ScopeDsymbol(funcdecl.loc, null);
                 sym.parent = sc2.scopesym;
                 sym.endlinnum = funcdecl.endloc.linnum;
@@ -1341,6 +1343,89 @@ private extern(C++) final class Semantic3Visitor : Visitor
             funcdecl.errors = true;
         //printf("-FuncDeclaration::semantic3('%s.%s', sc = %p, loc = %s)\n", parent.toChars(), toChars(), sc, loc.toChars());
         //fflush(stdout);
+    }
+
+    /**
+     * Extends the current function body to call the tracing functions located
+     * in DRuntime (`_d_function_trace_entry`, `_d_function_trace_exit`).
+     *
+     * The following function:
+     * ---
+     * void foo(<Params>)
+     * {
+     *     <Statements>
+     * }
+     * ---
+     *
+     * is rewritten to:
+     *
+     * ---
+     * void foo(<Params>)
+     * {
+     *     _d_function_trace_entry!(foo, typeof(<Params>))(<Params>);
+     *     scope (exit) _d_function_trace_exit!(foo, typeof(<Params>))(<Params>);
+     *     {
+     *         <Statements>
+     *     }
+     * }
+     * ---
+     **/
+    private void addTracingHooks(FuncDeclaration funcdecl)
+    {
+        if (
+            !verifyHookExist(funcdecl.loc, *sc, Id._d_function_trace_entry, "generating function entry messages") ||
+            !verifyHookExist(funcdecl.loc, *sc, Id._d_function_trace_exit, "generating function exit messages") ||
+            funcdecl.ident is Id._d_function_trace_entry ||
+            funcdecl.ident is Id._d_function_trace_exit
+        )
+            return;
+
+        const isMemberFunc = funcdecl.vthis && funcdecl.vthis.isThisDeclaration();
+        const len = (funcdecl.parameters ? funcdecl.parameters.length : 0) + isMemberFunc;
+        const loc = funcdecl.fbody.loc;
+
+        auto es = new Expressions();
+        es.reserve(len);
+
+        auto tiargs = new Objects();
+        tiargs.reserve(len + 1);
+        tiargs.push(funcdecl);
+
+        if (isMemberFunc)
+        {
+            es.push(new VarExp(loc, funcdecl.vthis));
+            tiargs.push(funcdecl.vthis.type);
+        }
+
+        if (funcdecl.parameters)
+        {
+            foreach (const idx, param; *funcdecl.parameters)
+            {
+                es.push(new VarExp(loc, param));
+                tiargs.push(param.type);
+            }
+        }
+
+        auto idExp = new IdentifierExp(loc, Id.empty);
+        auto traceHook = new DotIdExp(loc, idExp, Id.object);
+
+        Statement call(Identifier id)
+        {
+            auto dt = new DotTemplateInstanceExp(loc, traceHook, id, tiargs);
+            auto ec = CallExp.create(loc, dt, es);
+            return ExpStatement.create(loc, ec);
+        }
+
+        auto entry = call(Id._d_function_trace_entry);
+
+        auto exit = call(Id._d_function_trace_exit);
+        exit = new ScopeGuardStatement(loc, TOK.onScopeExit, exit);
+
+        auto stmts = new Statements(3);
+        (*stmts)[0] = entry;
+        (*stmts)[1] = exit;
+        (*stmts)[2] = funcdecl.fbody;
+        funcdecl.fbody = new CompoundStatement(loc, stmts);
     }
 
     override void visit(CtorDeclaration ctor)
