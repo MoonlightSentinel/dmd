@@ -7419,62 +7419,38 @@ extern (C++) class TemplateInstance : ScopeDsymbol
         }
     }
 
-    /// Returns: True if any parameters of this template instance are deprecated
-    extern (D) final bool hasDeprecatedParameters()
-    {
-        // Based on https://issues.dlang.org/show_bug.cgi?id=7619
-        // Determine if we should infer deprecated for the template instance
-        static bool isDeprecated(RootObject o)
-        {
-            for (Dsymbol s = getDsymbol(o); s; )
-            {
-                if (s.isDeprecated())
-                    return true;
-
-                auto fd = s.isFuncDeclaration();
-                s = fd ? fd.overnext : null;
-            }
-
-            return false;
-        }
-
-        foreach (o; tdtypes)
-        {
-            if (isDeprecated(o))
-                return true;
-
-            if (auto tuple = o.isTuple())
-            {
-                foreach (obj; tuple.objects)
-                {
-                    if (isDeprecated(obj))
-                        return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     extern(D) final bool inferDeprecatedFrom(Dsymbol deprSym, Scope* sc)
     {
+        import dmd.traits : isSame;
         assert(deprSym);
         assert(this.tiargs);
 
         foreach (arg; *this.tiargs)
         {
-            Dsymbol argSym = arg.isDsymbol();
-            if (!argSym) {
-                if (auto type = arg.isType())
-                    argSym = type.toDsymbol(sc);
-                else
-                {
-                    printf("%s: %s", argSym.kind(), argSym.toChars());
-                    assert(false);
-                }
-            }
-            if (argSym && deprSym == argSym)
+            auto argSym = getDsymbol(arg);
+            if (!argSym)
+                continue;
+
+            // printf("%d: argSym (%p) = %s\n", cast(int) idx, cast(void*) argSym, argSym.toPrettyChars);
+            bool matches;
+            if (argSym.isOverloadable())
             {
+                // puts("Resolving overload...");
+                const res = overloadApply(argSym, (Dsymbol o) {
+                    const oRes = isSame(deprSym, o, sc);
+                    // printf("%s: o (%p)  = %d\n", o.loc.toChars, cast(void*) o, oRes);
+                    return oRes;
+                }, sc);
+                // printf("overloadApply: %d\n", res);
+                matches = !!res;
+            }
+            else
+            {
+                // puts("Simple");
+                matches = isSame(deprSym, argSym, sc);
+            }
+
+            if (matches) {
                 this.setDeprecated();
                 return true;
             }
