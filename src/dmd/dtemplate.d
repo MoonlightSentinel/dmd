@@ -7425,36 +7425,8 @@ extern (C++) class TemplateInstance : ScopeDsymbol
         assert(deprSym);
         assert(this.tiargs);
 
-        foreach (arg; *this.tiargs)
-        {
-            auto argSym = getDsymbol(arg);
-            if (!argSym)
-                continue;
-
-            // printf("%d: argSym (%p) = %s\n", cast(int) idx, cast(void*) argSym, argSym.toPrettyChars);
-            bool matches;
-            if (argSym.isOverloadable())
-            {
-                // puts("Resolving overload...");
-                const res = overloadApply(argSym, (Dsymbol o) {
-                    const oRes = isSame(deprSym, o, sc);
-                    // printf("%s: o (%p)  = %d\n", o.loc.toChars, cast(void*) o, oRes);
-                    return oRes;
-                }, sc);
-                // printf("overloadApply: %d\n", res);
-                matches = !!res;
-            }
-            else
-            {
-                // puts("Simple");
-                matches = isSame(deprSym, argSym, sc);
-            }
-
-            if (matches) {
-                this.setDeprecated();
-                return true;
-            }
-        }
+        this.setDeprecated();
+        return true;
 
         return false;
     }

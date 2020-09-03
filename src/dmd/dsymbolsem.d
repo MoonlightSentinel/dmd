@@ -6453,6 +6453,9 @@ Laftersemantic:
         tempdecl.instances[ti2] = tempinst;
     }
 
+
+    tempinst.checkDeprecated(tempinst.loc, sc);
+
     static if (LOG)
     {
         printf("-TemplateInstance.dsymbolSemantic('%s', this=%p)\n", tempinst.toChars(), tempinst);
