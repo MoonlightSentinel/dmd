@@ -28,7 +28,7 @@ import dmd.utf;
  */
 extern (C++) final class Identifier : RootObject
 {
-    private const int value;
+    private const short value;
 
     // Indicates if this is an identifier used for an anonymous symbol.
     private const bool isAnonymous_ = false;
@@ -52,7 +52,7 @@ nothrow:
          length = the length of `name`, excluding the terminating `'\0'`
          value = Identifier value (e.g. `Id.unitTest`) or `TOK.identifier`
      */
-    extern (D) this(const(char)* name, size_t length, int value)
+    extern (D) this(const(char)* name, size_t length, short value)
     in
     {
         assert(name[length] == '\0');
@@ -64,13 +64,13 @@ nothrow:
     }
 
     /// ditto
-    extern (D) this(const(char)[] name, int value)
+    extern (D) this(const(char)[] name, short value)
     {
         //printf("Identifier('%.*s', %d)\n", cast(int)name.length, name.ptr, value);
         this(name, value, false);
     }
 
-    extern (D) private this(const(char)[] name, int value, bool isAnonymous)
+    extern (D) private this(const(char)[] name, short value, bool isAnonymous)
     {
         //printf("Identifier('%.*s', %d, %d)\n", cast(int)name.length, name.ptr, value, isAnonymous);
         this.name = name;
@@ -93,7 +93,7 @@ nothrow:
         return name;
     }
 
-    int getValue() const pure
+    short getValue() const pure
     {
         return value;
     }
@@ -291,12 +291,12 @@ nothrow:
         return id;
     }
 
-    extern (D) static Identifier idPool(const(char)* s, size_t len, int value)
+    extern (D) static Identifier idPool(const(char)* s, size_t len, short value)
     {
         return idPool(s[0 .. len], value);
     }
 
-    extern (D) static Identifier idPool(const(char)[] s, int value)
+    extern (D) static Identifier idPool(const(char)[] s, short value)
     {
         auto sv = stringtable.insert(s, null);
         assert(sv);

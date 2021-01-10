@@ -7978,13 +7978,13 @@ struct Id
 
 class Identifier final : public RootObject
 {
-    const int32_t value;
+    const int16_t value;
     const bool isAnonymous_;
     const _d_dynamicArray< const char > name;
 public:
     static Identifier* create(const char* name);
     const char* toChars() const;
-    int32_t getValue() const;
+    int16_t getValue() const;
     bool isAnonymous() const;
     const char* toHChars2() const;
     DYNCAST dyncast() const;

@@ -16,15 +16,15 @@
 class Identifier : public RootObject
 {
 private:
-    int value;
-    bool isAnonymous_;
     DString string;
+    short value;
+    bool isAnonymous_;
 
 public:
     static Identifier* create(const char *string);
     bool equals(const RootObject *o) const;
     const char *toChars() const;
-    int getValue() const;
+    short getValue() const;
     bool isAnonymous() const;
     const char *toHChars2() const;
     DYNCAST dyncast() const;
