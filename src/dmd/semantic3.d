@@ -1372,14 +1372,16 @@ private extern(C++) final class Semantic3Visitor : Visitor
         if (ctor.fbody && ad && ad.fieldDtor && global.params.dtorFields && !global.params.betterC && !ctor.type.toTypeFunction.isnothrow)
         {
             /* Generate:
+             * {
              *   this.fieldDtor()
+             * }
              */
             Expression e = new ThisExp(ctor.loc);
             e.type = ad.type.mutableOf();
             e = new DotVarExp(ctor.loc, e, ad.fieldDtor, false);
             auto ce = new CallExp(ctor.loc, e);
             auto sexp = new ExpStatement(ctor.loc, ce);
-            auto ss = new ScopeStatement(ctor.loc, sexp, ctor.loc);
+            auto cs = new CompoundStatement(ctor.loc, sexp);
 
             // @@@DEPRECATED_2096@@@
             // Allow negligible attribute violations to allow for a smooth
@@ -1411,6 +1413,45 @@ private extern(C++) final class Semantic3Visitor : Visitor
                 }
             }
 
+            if (!ad.aggNew)
+            {
+                // import core.memory;
+                auto ims = new ImportStatement(ctor.loc, new Dsymbols(1));
+                (*ims.imports)[0] = new Import(ctor.loc, [Id.core], Identifier.idPool("memory"), null, false);
+
+                // Insert before the dtor call
+                cs.statements.shift(ims);
+
+                // GC.addrOf, GC.clrAttr
+                auto gc = new IdentifierExp(ctor.loc, Identifier.idPool("GC"));
+                auto gcAddrOf = new DotIdExp(ctor.loc, gc, Identifier.idPool("addrOf"));
+                auto gcClearAttr = new DotIdExp(ctor.loc, gc, Identifier.idPool("clrAttr"));
+
+                // arg = cast(void*) [&]this
+                Expression this_ = new ThisExp(ctor.loc);
+                if (!ad.isClassDeclaration())
+                    this_ = new AddrExp(ctor.loc, this_);
+                auto arg = new CastExp(ctor.loc, this_, Type.tvoidptr);
+
+                // Shortcut attribute calculation because it's a fixed API
+                import core.memory : GC;
+                enum attr = GC.BlkAttr.FINALIZE | GC.BlkAttr.STRUCTFINAL;
+
+                // callClr = GC.clrAttr(GC.addrOf(<arg>), attr)
+                auto callAddr = new CallExp(ctor.loc, gcAddrOf, arg);
+                auto callClr = new CallExp(ctor.loc, gcClearAttr, callAddr, IntegerExp.literal!attr());
+
+                // Wrap callClr in a @trusted lambda
+                auto tf = new TypeFunction(ParameterList(), Type.tvoid, LINK.d);
+                tf.trust = TRUST.trusted;
+                auto fld = new FuncLiteralDeclaration(ctor.loc, ctor.loc, tf, TOK.delegate_, null);
+                fld.fbody = new ExpStatement(ctor.loc, callClr);
+                callClr = new CallExp(ctor.loc, new FuncExp(ctor.loc, fld));
+
+                // Insert BEFORE the dtor call s.t. it isnt skipped by another exception
+                cs.statements.insert(1, new ExpStatement(ctor.loc, callClr));
+            }
+
             version (all)
             {
                 /* Generate:
@@ -1424,10 +1465,10 @@ private extern(C++) final class Semantic3Visitor : Visitor
                  */
                 Identifier id = Identifier.generateId("__o");
                 auto ts = new ThrowStatement(ctor.loc, new IdentifierExp(ctor.loc, id));
-                auto handler = new CompoundStatement(ctor.loc, ss, ts);
+                cs.statements.push(ts);
 
                 auto catches = new Catches();
-                auto ctch = new Catch(ctor.loc, getException(), id, handler);
+                auto ctch = new Catch(ctor.loc, getException(), id, cs);
                 catches.push(ctch);
 
                 ctor.fbody = new TryCatchStatement(ctor.loc, ctor.fbody, catches);
@@ -1439,9 +1480,18 @@ private extern(C++) final class Semantic3Visitor : Visitor
                  * Hopefully we can use this version someday when scope(failure) catches
                  * Exception instead of Throwable.
                  */
-                auto s = new ScopeGuardStatement(ctor.loc, TOK.onScopeFailure, ss);
+                auto s = new ScopeGuardStatement(ctor.loc, TOK.onScopeFailure, cs);
                 ctor.fbody = new CompoundStatement(ctor.loc, s, ctor.fbody);
             }
+
+            // OutBuffer buf;
+            // HdrGenState hgs;
+            // hgs.fullDump = true;
+            // toCBuffer(ctor.fbody, &buf, &hgs);
+
+            // puts("========================================================");
+            // puts(buf.extractChars());
+            // puts("========================================================\n");
         }
         visit(cast(FuncDeclaration)ctor);
     }
