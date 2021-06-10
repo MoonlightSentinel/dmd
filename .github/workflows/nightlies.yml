@@ -16,6 +16,8 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+  push:
+
 jobs:
   # Build the documentation used by all releases
   build-docs:
