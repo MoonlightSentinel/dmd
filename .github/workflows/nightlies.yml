@@ -51,10 +51,12 @@ jobs:
 
       # Fetch host compiler
       - uses: dlang-community/setup-dlang@v1
+        if: ${{ false }}
         name: Install host DMD
 
       # Actually build the docs
       - name: Build docs and man pages
+        if: ${{ false }}
         shell: bash
         run: |
           set -euox pipefail
@@ -68,6 +70,7 @@ jobs:
 
       # Save the generated documentation for the target-specific builds
       - name: Upload generated docs as a temporary artifact
+        if: ${{ false }}
         uses: actions/upload-artifact@v2
         with:
           name: dmd-nightly-docs
@@ -79,6 +82,7 @@ jobs:
 
   # Build and package a new release for each platform
   build-all-releases:
+    if: ${{ false }}
     name: Build nightly for ${{ matrix.target }}  on ${{ matrix.os }}
     needs: build-docs
     timeout-minutes: 60
@@ -266,12 +270,13 @@ jobs:
   # Bundles and publishes the entire release
   generate_release:
     name: "Publish artifacts on the release page"
-    needs: build-all-releases
+    needs: build-docs
     steps:
       #################################################################
       # Fetch all artifacts from the jobs defined above
       #
       - name: Download generated releases from the artifacts
+        if: ${{ false }}
         uses: actions/download-artifact@v2
         with:
           name: dmd-nightly
@@ -285,6 +290,13 @@ jobs:
         shell: bash
         run: |
           set -euox pipefail
+          mkdir -p ~/artifacts/
+
+          echo "Test" > ~/artifacts/dmd.master.freebsd-64.tar.xz
+          echo "Test" > ~/artifacts/dmd.master.linux.tar.xz
+          echo "Test" > ~/artifacts/dmd.master.osx.tar.xz
+          echo "Test" > ~/artifacts/dmd.master.windows.7z
+
           ls -aul ~ ~/artifacts
           echo "::set-output name=artifacts_directory::$HOME/artifacts"
 
