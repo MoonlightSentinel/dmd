@@ -105,9 +105,6 @@ struct Data final
 {
     static Data* pt;
     static int32_t* bar();
-    Data()
-    {
-    }
 };
 
 extern void useData(bool a = !Data::pt, bool b = Data::bar() == nullptr, bool c = Data::bar() != nullptr);

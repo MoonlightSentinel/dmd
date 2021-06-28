@@ -57,17 +57,11 @@ extern void importFunc();
 struct A final
 {
     // Ignored renamed import `myFunc = importFunc` because `using` only supports types
-    A()
-    {
-    }
 };
 
 struct Hidden final
 {
     // Ignored function dtoh_verbose.Hidden.hidden because it is private
-    Hidden()
-    {
-    }
 };
 
 // Ignored alias dtoh_verbose.D because of linkage
@@ -86,18 +80,12 @@ template <typename T>
 struct FullImportTmpl final
 {
     // Ignored `dtoh_imports` because it's inside of a template declaration
-    FullImportTmpl()
-    {
-    }
 };
 
 template <typename T>
 struct SelectiveImportsTmpl final
 {
     // Ignored `__anonymous` because it's inside of a template declaration
-    SelectiveImportsTmpl()
-    {
-    }
 };
 ---
 */

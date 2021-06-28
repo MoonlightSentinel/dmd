@@ -49,10 +49,6 @@ protected:
     int32_t d;
 private:
     int32_t e;
-public:
-    S1()
-    {
-    }
 };
 
 class S2 final
@@ -63,10 +59,6 @@ protected:
     int32_t bf();
     int32_t cf();
     int32_t df();
-public:
-    S2()
-    {
-    }
 };
 
 class C1
@@ -101,13 +93,6 @@ public:
         int32_t privateInner;
     public:
         int32_t publicInner;
-        PublicInnerStruct() :
-            publicInner()
-        {
-        }
-        PublicInnerStruct(int32_t publicInner) :
-            publicInner(publicInner)
-            {}
     };
 
 private:
@@ -117,13 +102,6 @@ private:
         int32_t privateInner;
     public:
         int32_t publicInner;
-        PrivateInnerClass() :
-            publicInner()
-        {
-        }
-        PrivateInnerClass(int32_t publicInner) :
-            publicInner(publicInner)
-            {}
     };
 
 public:
@@ -142,9 +120,6 @@ private:
 
 public:
     typedef PrivateInnerEnum PublicAlias;
-    Outer()
-    {
-    }
 };
 ---
 */

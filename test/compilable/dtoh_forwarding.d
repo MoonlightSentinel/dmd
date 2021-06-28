@@ -60,13 +60,6 @@ struct Parent
 struct ExternDStructRequired final
 {
     int32_t member;
-    ExternDStructRequired() :
-        member()
-    {
-    }
-    ExternDStructRequired(int32_t member) :
-        member(member)
-        {}
 };
 
 template <typename T>
@@ -74,9 +67,6 @@ struct ExternDTemplStruct final
 {
     // Ignoring var member alignment 0
     T member;
-    ExternDTemplStruct()
-    {
-    }
 };
 
 extern Child* child;
@@ -89,10 +79,6 @@ extern Struct* strPtr;
 
 class Struct final
 {
-public:
-    Struct()
-    {
-    }
 };
 
 extern Enum* enumPtr;
@@ -108,14 +94,8 @@ struct OuterStruct final
 {
     struct NestedStruct final
     {
-        NestedStruct()
-        {
-        }
     };
 
-    OuterStruct()
-    {
-    }
 };
 
 extern ExternDClass* externDClassPtr;

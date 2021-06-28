@@ -56,17 +56,6 @@ struct S final
     int32_t i;
     U1 u1;
     U2 u2;
-    S() :
-        i(),
-        u1(),
-        u2()
-    {
-    }
-    S(int32_t i, U1 u1 = U1(0), U2 u2 = U2(NAN)) :
-        i(i),
-        u1(u1),
-        u2(u2)
-        {}
 };
 ---
 +/

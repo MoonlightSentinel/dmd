@@ -55,9 +55,6 @@ struct Outer final
             static Middle* innerPtr;
             static Inner* innerInnerPtr;
             static InnerTmpl<int32_t >* innerInnerTmplPtr;
-            Inner()
-            {
-            }
         };
 
         template <typename U>
@@ -71,14 +68,8 @@ struct Outer final
             static Inner* innerTmplInnerPtr;
             // Ignoring var innerTmplInnerTmplPtr alignment 0
             static InnerTmpl* innerTmplInnerTmplPtr;
-            InnerTmpl()
-            {
-            }
         };
 
-        Middle()
-        {
-        }
     };
 
     template <typename T>
@@ -94,9 +85,6 @@ struct Outer final
             static Inner* ptr;
             // Ignoring var ptr2 alignment 0
             static MiddleTmpl<T >* ptr2;
-            Inner()
-            {
-            }
         };
 
         template <typename U>
@@ -111,19 +99,10 @@ struct Outer final
             // Ignoring var a alignment 0
             static T a;
             static U bar();
-            InnerTmpl()
-            {
-            }
         };
 
-        MiddleTmpl()
-        {
-        }
     };
 
-    Outer()
-    {
-    }
 };
 
 ---

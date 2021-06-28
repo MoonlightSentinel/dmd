@@ -46,15 +46,6 @@ struct ExternDStruct final
 {
     int32_t i;
     double d;
-    ExternDStruct() :
-        i(),
-        d()
-    {
-    }
-    ExternDStruct(int32_t i, double d = NAN) :
-        i(i),
-        d(d)
-        {}
 };
 
 enum class ExternDEnum
@@ -69,9 +60,6 @@ struct ExternDStructTemplate final
     int32_t i;
     // Ignoring var d alignment 0
     double d;
-    ExternDStructTemplate()
-    {
-    }
 };
 
 class Object
@@ -99,21 +87,11 @@ public:
 struct ExternDStruct2 final
 {
     int32_t doStuff();
-    ExternDStruct2()
-    {
-    }
 };
 
 struct ExternDStruct3 final
 {
     int32_t a;
-    ExternDStruct3() :
-        a()
-    {
-    }
-    ExternDStruct3(int32_t a) :
-        a(a)
-        {}
 };
 
 namespace ExternDEnum2
@@ -126,16 +104,6 @@ struct ExternCppStruct final
     ExternDStruct s;
     ExternDEnum e;
     ExternDStructTemplate< > st;
-    ExternCppStruct() :
-        s(),
-        st()
-    {
-    }
-    ExternCppStruct(ExternDStruct s, ExternDEnum e = (ExternDEnum)0, ExternDStructTemplate< > st = ExternDStructTemplate< >(0, NAN)) :
-        s(s),
-        e(e),
-        st(st)
-        {}
 };
 
 extern ExternDClass* globalC;

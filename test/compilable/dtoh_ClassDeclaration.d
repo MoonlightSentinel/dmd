@@ -50,7 +50,7 @@ public:
 class C2
 {
 public:
-    int32_t a;
+    int32_t a = 42;
     int32_t b;
     int64_t c;
     C2(int32_t a);
@@ -89,13 +89,6 @@ public:
     struct Inner final
     {
         int32_t x;
-        Inner() :
-            x()
-        {
-        }
-        Inner(int32_t x) :
-            x(x)
-            {}
     };
 
     class InnerC

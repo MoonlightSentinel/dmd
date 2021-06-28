@@ -68,9 +68,6 @@ struct WithImaginaryTemplate final
     // Ignored function onParam because one of its parameters has type `ifloat` which cannot be mapped to C++
     // Ignoring var onVariable alignment 0
     // Ignored variable onVariable because its type cannot be mapped to C++
-    WithImaginaryTemplate()
-    {
-    }
 };
 
 extern WithImaginaryTemplate<int32_t > instance;

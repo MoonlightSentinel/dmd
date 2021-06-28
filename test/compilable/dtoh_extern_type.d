@@ -47,9 +47,6 @@ class ClassFromStruct final
 {
 public:
     void foo();
-    ClassFromStruct()
-    {
-    }
 };
 
 class ClassFromClass
@@ -61,9 +58,6 @@ public:
 struct StructFromStruct final
 {
     void foo();
-    StructFromStruct()
-    {
-    }
 };
 
 struct StructFromClass
@@ -73,56 +67,23 @@ struct StructFromClass
 
 struct Floats final
 {
-    float f;
-    double d;
-    _d_real r;
-    double nan;
-    double inf;
-    double nInf;
-    Floats() :
-        f(1.23F),
-        d(4.56),
-        r(7.89L),
-        nan(NAN),
-        inf(INFINITY),
-        nInf(-INFINITY)
-    {
-    }
-    Floats(float f, double d = 4.56, _d_real r = 7.89L, double nan = NAN, double inf = INFINITY, double nInf = -INFINITY) :
-        f(f),
-        d(d),
-        r(r),
-        nan(nan),
-        inf(inf),
-        nInf(nInf)
-        {}
+    float f = 1.23F;
+    double d = 4.56;
+    _d_real r = 7.89L;
+    double nan = NAN;
+    double inf = INFINITY;
+    double nInf = -INFINITY;
 };
 
 struct Null final
 {
-    _d_dynamicArray< const char > null_;
-    Null() :
-        null_()
-    {
-    }
-    Null(_d_dynamicArray< const char > null_) :
-        null_(null_)
-        {}
+    _d_dynamicArray< const char > null_ = {};
 };
 
 struct Wrapper final
 {
-    Null n1;
-    Null n2;
-    Wrapper() :
-        n1(Null({ 5, "Hello" })),
-        n2(Null({}))
-    {
-    }
-    Wrapper(Null n1, Null n2 = Null({})) :
-        n1(n1),
-        n2(n2)
-        {}
+    Null n1 = Null({ 5, "Hello" });
+    Null n2 = Null({});
 };
 
 extern const _d_dynamicArray< const char > helloWorld;

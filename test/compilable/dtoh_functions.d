@@ -49,18 +49,8 @@ struct S final
     struct Nested final
     {
         void useStaticVar(int32_t i = staticVar);
-        Nested()
-        {
-        }
     };
 
-    S() :
-        i()
-    {
-    }
-    S(int32_t i) :
-        i(i)
-        {}
 };
 
 extern "C" int32_t bar(int32_t x);
@@ -98,25 +88,11 @@ struct W1 final
 {
     MS ms;
     /* MSN */ S msn;
-    W1()
-    {
-    }
-    W1(MS ms, /* MSN */ S msn = S(42)) :
-        ms(ms),
-        msn(msn)
-        {}
 };
 
 struct W2 final
 {
     W1 w1;
-    W2() :
-        w1()
-    {
-    }
-    W2(W1 w1) :
-        w1(w1)
-        {}
 };
 
 extern W2 w2;
@@ -133,18 +109,8 @@ struct S2 final
     struct S3 final
     {
         static int32_t i;
-        S3()
-        {
-        }
     };
 
-    S2() :
-        s()
-    {
-    }
-    S2(S s) :
-        s(s)
-        {}
 };
 
 extern S2 s2;

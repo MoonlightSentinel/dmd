@@ -53,9 +53,6 @@ struct S final
         extern "C" void foo();
         void bar();
     };
-    S()
-    {
-    }
 };
 
 extern void foo();

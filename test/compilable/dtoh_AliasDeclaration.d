@@ -83,9 +83,6 @@ typedef size_t(*F)(size_t x);
 template <typename T, typename U>
 struct TS final
 {
-    TS()
-    {
-    }
 };
 
 template <typename T, typename U>
@@ -100,24 +97,15 @@ struct FullImport final
 {
     using ImportsC = ::ImportsC;
     using MyStdcInt = ::MyStdcInt;
-    FullImport()
-    {
-    }
 };
 
 struct SelectiveImports final
 {
     using aliasName = ::ImportsC;
-    SelectiveImports()
-    {
-    }
 };
 
 struct PrivateImport final
 {
-    PrivateImport()
-    {
-    }
 };
 
 typedef /* noreturn */ char Impossible[0];

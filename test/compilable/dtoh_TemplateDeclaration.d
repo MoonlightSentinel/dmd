@@ -47,27 +47,14 @@ struct Outer final
     struct Member final
     {
         typedef int32_t Nested;
-        Member()
-        {
-        }
     };
 
-    Outer() :
-        a()
-    {
-    }
-    Outer(int32_t a) :
-        a(a)
-        {}
 };
 
 enum : int32_t { SomeOtherLength = 1 };
 
 struct ActualBuffer final
 {
-    ActualBuffer()
-    {
-    }
 };
 
 template <typename T>
@@ -81,11 +68,8 @@ struct A final
     // Ignoring var GsharedNum alignment 0
     static int32_t GsharedNum;
     // Ignoring var MemNum alignment 0
-    const int32_t MemNum;
+    const int32_t MemNum = 13;
     void foo();
-    A()
-    {
-    }
 };
 
 template <typename T>
@@ -93,21 +77,11 @@ struct NotInstantiated final
 {
     // Ignoring var noInit alignment 0
     // Ignoring var missingSem alignment 0
-    NotInstantiated()
-    {
-    }
 };
 
 struct B final
 {
     A<int32_t > x;
-    B() :
-        x()
-    {
-    }
-    B(A<int32_t > x) :
-        x(x)
-        {}
 };
 
 template <typename T>
@@ -115,9 +89,6 @@ struct Foo final
 {
     // Ignoring var val alignment 0
     T val;
-    Foo()
-    {
-    }
 };
 
 template <typename T>
@@ -125,9 +96,6 @@ struct Bar final
 {
     // Ignoring var v alignment 0
     Foo<T > v;
-    Bar()
-    {
-    }
 };
 
 template <typename T>
@@ -146,9 +114,6 @@ struct Array final
     // Ignoring var j alignment 0
     typename Outer::Member::Nested j;
     void visit(typename T::Member::Nested i);
-    Array()
-    {
-    }
 };
 
 template <typename T, typename U>
@@ -188,18 +153,12 @@ class ChildInt : public Parent<int32_t >
 struct HasMixins final
 {
     void foo(int32_t t);
-    HasMixins()
-    {
-    }
 };
 
 template <typename T>
 struct HasMixinsTemplate final
 {
     void foo(T t);
-    HasMixinsTemplate()
-    {
-    }
 };
 
 extern HasMixinsTemplate<bool > hmti;
@@ -216,9 +175,6 @@ struct NotAA final
     T otherBuffer[SomeOtherLength];
     // Ignoring var calcBuffer alignment 0
     T calcBuffer[foo(1)];
-    NotAA()
-    {
-    }
 };
 
 template <typename Buffer>
@@ -228,18 +184,12 @@ struct BufferTmpl final
     Buffer buffer;
     // Ignoring var buffer2 alignment 0
     Buffer buffer2;
-    BufferTmpl()
-    {
-    }
 };
 
 struct ImportedBuffer final
 {
     typedef ActualBuffer Buffer;
     ActualBuffer buffer2;
-    ImportedBuffer()
-    {
-    }
 };
 ---
 */

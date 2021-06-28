@@ -41,7 +41,7 @@ struct _d_dynamicArray final
 
 struct Foo final
 {
-    int32_t a;
+    int32_t a = 1;
     enum : int32_t { b = 2 };
 
     // Ignored enum `dtoh_21217.Foo.c` because it is `private`.
@@ -63,14 +63,6 @@ private:
     };
 
     // Ignored enum `dtoh_21217.Foo.h` because it is `private`.
-public:
-    Foo() :
-        a(1)
-    {
-    }
-    Foo(int32_t a) :
-        a(a)
-        {}
 };
 
 ---

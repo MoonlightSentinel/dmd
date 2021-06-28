@@ -121,13 +121,6 @@ static STC const STC_D = (STC)3;
 struct Foo final
 {
     int32_t i;
-    Foo() :
-        i()
-    {
-    }
-    Foo(int32_t i) :
-        i(i)
-        {}
 };
 
 namespace MyEnum
@@ -141,13 +134,6 @@ static /* MyEnum */ Foo const test = Foo(42);
 struct FooCpp final
 {
     int32_t i;
-    FooCpp() :
-        i()
-    {
-    }
-    FooCpp(int32_t i) :
-        i(i)
-        {}
 };
 
 namespace MyEnumCpp

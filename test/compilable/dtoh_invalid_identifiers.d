@@ -60,22 +60,12 @@ struct S final
 {
     // Ignoring var x alignment 0
     register_ x;
-    S()
-    {
-    }
 };
 
 struct S2 final
 {
     int32_t register_;
     void and();
-    S2() :
-        register_()
-    {
-    }
-    S2(int32_t register_) :
-        register_(register_)
-        {}
 };
 
 extern void f(int32_t alignas_);
@@ -107,9 +97,6 @@ struct InvalidNames final
     // Ignoring var register alignment 0
     typename_ register_;
     void foo(typename_ and_);
-    InvalidNames()
-    {
-    }
 };
 
 extern void useInvalid(InvalidNames<int32_t > _param_0);

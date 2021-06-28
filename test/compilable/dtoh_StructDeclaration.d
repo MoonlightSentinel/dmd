@@ -45,49 +45,26 @@ struct S final
     int32_t b;
     int64_t c;
     _d_dynamicArray< int32_t > arr;
-    S() :
-        a(),
-        b(),
-        c(),
-        arr()
-    {
-    }
-    S(int8_t a, int32_t b = 0, int64_t c = 0LL, _d_dynamicArray< int32_t > arr = {}) :
-        a(a),
-        b(b),
-        c(c),
-        arr(arr)
-        {}
 };
 
 struct S2 final
 {
-    int32_t a;
+    int32_t a = 42;
     int32_t b;
     int64_t c;
-    S d;
+    S d = S(0, 0, 0LL, {});
     S2(int32_t a);
     S2(char ) = delete;
-    S2() :
-        a(42),
-        b(),
-        c()
-    {
-    }
+    S2() = default;
 };
 
 struct S3 final
 {
-    int32_t a;
+    int32_t a = 42;
     int32_t b;
     int64_t c;
     extern "C" S3(int32_t a);
-    S3() :
-        a(42),
-        b(),
-        c()
-    {
-    }
+    S3() = default;
 };
 
 struct S4 final
@@ -96,19 +73,6 @@ struct S4 final
     int64_t b;
     int32_t c;
     int8_t d;
-    S4() :
-        a(),
-        b(),
-        c(),
-        d()
-    {
-    }
-    S4(int32_t a, int64_t b = 0LL, int32_t c = 0, int8_t d = 0) :
-        a(a),
-        b(b),
-        c(c),
-        d(d)
-        {}
 };
 
 #pragma pack(push, 1)
@@ -118,25 +82,13 @@ struct Aligned final
     int32_t b;
     int64_t c;
     Aligned(int32_t a);
-    Aligned() :
-        a(),
-        b(),
-        c()
-    {
-    }
+    Aligned() = default;
 };
 #pragma pack(pop)
 
 struct Null final
 {
-    void* field;
-    Null() :
-        field(nullptr)
-    {
-    }
-    Null(void* field) :
-        field(field)
-        {}
+    void* field = nullptr;
 };
 
 struct A final
@@ -158,27 +110,11 @@ struct A final
     struct Inner final
     {
         int32_t x;
-        Inner() :
-            x()
-        {
-        }
-        Inner(int32_t x) :
-            x(x)
-            {}
     };
 
     typedef Inner I;
     class C;
 
-    A() :
-        a(),
-        s()
-    {
-    }
-    A(int32_t a, S s = S(0, 0, 0LL, {})) :
-        a(a),
-        s(s)
-        {}
 };
 
 union U

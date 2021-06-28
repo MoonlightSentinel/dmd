@@ -985,6 +985,21 @@ public:
         {
             writeProtection(vd.visibility.kind);
             typeToBuffer(type, vd, true);
+
+            if (global.params.cplusplus >= CppStdRevision.cpp11 && vd._init)
+            {
+                const bookmark = buf.length;
+                const oldIgnored = this.ignoredCounter;
+
+                buf.writestring(" = ");
+                auto e = findDefaultInitializer(vd);
+                printExpressionFor(type, e);
+
+                // Remove " = " if the symbol could not be emitted
+                if (oldIgnored != this.ignoredCounter)
+                    buf.setsize(bookmark);
+            }
+
             buf.writestringln(";");
 
             debug (Debug_DtoH_Checks)
@@ -1251,8 +1266,25 @@ public:
         {
             m.accept(this);
         }
-        // Generate default ctor
-        if (!sd.noDefaultCtor && !sd.isUnionDeclaration())
+
+
+        if (sd.noDefaultCtor || sd.isUnionDeclaration())
+        {
+            // No default initialization
+        }
+        else if (global.params.cplusplus >= CppStdRevision.cpp11)
+        {
+            // Uses field initializers, create a default ctor if required to enable default initialization
+            if (sd.ctor || sd.hasCopyCtor)
+            {
+                writeProtection(AST.Visibility.Kind.public_);
+                buf.writestring(sd.ident.toString());
+                buf.writestring("() = default;");
+                buf.writenl();
+            }
+        }
+        // Generate default ctor when field initializers are not available
+        else
         {
             writeProtection(AST.Visibility.Kind.public_);
             buf.printf("%s()", sd.ident.toChars());
