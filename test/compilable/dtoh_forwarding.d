@@ -42,7 +42,6 @@ struct _d_dynamicArray final
 struct Child;
 class Struct;
 enum class Enum;
-struct OuterStruct;
 class ExternDClass;
 struct ExternDStruct;
 template <typename T>
@@ -55,6 +54,14 @@ class ExternDTemplClass;
 struct Parent
 {
     virtual void bar();
+};
+
+struct OuterStruct final
+{
+    struct NestedStruct final
+    {
+    };
+
 };
 
 struct ExternDStructRequired final
@@ -89,14 +96,6 @@ enum class Enum
 };
 
 extern OuterStruct::NestedStruct* nestedStrPtr;
-
-struct OuterStruct final
-{
-    struct NestedStruct final
-    {
-    };
-
-};
 
 extern ExternDClass* externDClassPtr;
 
