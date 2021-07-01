@@ -50,6 +50,7 @@ template <typename T>
 class TemplStruct;
 template <typename T>
 class ExternDTemplClass;
+struct OnlyByRef;
 
 struct Parent
 {
@@ -126,6 +127,8 @@ public:
 extern ExternDTemplClass<int32_t >* externTemplClass;
 
 extern ExternDTemplStruct<int32_t > externTemplStruct;
+
+extern void foo(OnlyByRef& obr);
 
 ---
 */
@@ -234,3 +237,9 @@ extern(D) struct ExternDTemplStruct(T)
 {
     T member;
 }
+
+//******************************************************
+
+extern(D) struct OnlyByRef {}
+
+void foo(ref OnlyByRef obr) {}
